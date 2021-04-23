@@ -12,22 +12,35 @@
 
 <body>
     <?php
-        require 'db.php';
+    require 'db.php';
 
-        if ( isset( $_REQUEST['name'] ) && isset( $_REQUEST['username'] ) && isset( $_REQUEST['email'] ) && isset( $_REQUEST['password'] ) ) {
-            $name = trim( $_REQUEST['name'] );
-            $username = trim( $_REQUEST['username'] );
-            $email = trim( $_REQUEST['email'] );
-            $password = trim( $_REQUEST['password'] );
-            $password_hash = password_hash( $password, PASSWORD_BCRYPT );
+    if (isset($_REQUEST['name']) && isset($_REQUEST['username']) && isset($_REQUEST['email']) && isset($_REQUEST['password'])) {
+        $name = trim($_REQUEST['name']);
+        $username = trim($_REQUEST['username']);
+        $email = trim($_REQUEST['email']);
+        $password = trim($_REQUEST['password']);
+        $password_hash = password_hash($password, PASSWORD_BCRYPT);
 
-            $query = $con->prepare( "INSERT INTO zeljko_k (name, username, email, password) VALUES (?, ?, ?, ?);" );
+        $query = $con->prepare("SELECT * FROM zeljko_k WHERE username = ?;");
 
-            $query->bind_param( "ssss", $name, $username, $email, $password_hash );
+        $query->bind_param("s", $username);
 
-            $result = $query->execute();
+        $query->execute();
+        $query->store_result();
 
-            if ( $result ) {
+        if ($query->num_rows() > 0) {
+            echo "<div class='form'>
+                  <h3>Ovaj korisnik je već registriran.</h3><br/>
+                  <p class='link'>Kliknite ovdje za ponovnu <a href='register.php'>Registraciju</a> .</p>
+                  </div>";
+        } else {
+            $insertQuery = $con->prepare("INSERT INTO zeljko_k (name, username, email, password) VALUES (?, ?, ?, ?);");
+
+            $insertQuery->bind_param("ssss", $name, $username, $email, $password_hash);
+
+            $result = $insertQuery->execute();
+
+            if ($result) {
                 echo "<div class='form'>
                       <h3>Uspješno ste se registrirali.</h3><br/>
                       <p class='link'>Kliknite ovdje za <a href='login.php'>Prijavu</a></p>
@@ -35,10 +48,11 @@
             } else {
                 echo "<div class='form'>
                       <h3>Nedostaju obavezna polja.</h3><br/>
-                      <p class='link'>Kliknite ovdje za ponovnu <a href='registration.php'>Registraciju</a> .</p>
+                      <p class='link'>Kliknite ovdje za ponovnu <a href='register.php'>Registraciju</a> .</p>
                       </div>";
             }
-        } else {
+        }
+    } else {
     ?>
         <form class="form" action="" method="post">
             <h1 class="login-title">Registracija</h1>
@@ -53,7 +67,7 @@
             <p class="link">Već imate račun? <a href="login.php">Prijavite se ovdje</a></p>
         </form>
     <?php
-        }
+    }
     ?>
 </body>
 

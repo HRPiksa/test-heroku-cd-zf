@@ -16,7 +16,7 @@
 
 <body>
     <div class="form">
-        <p>Pozdrav,   <?php echo $_SESSION['username']; ?>!</p>
+        <p>Pozdrav,  <b> <?php echo $_SESSION['username']; ?>!</b></p>
 
         <br>
 
